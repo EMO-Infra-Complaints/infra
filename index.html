@@ -1,0 +1,79 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>EMO Infra Complaints</title>
+<style>
+:root{--navy:#17324D;--bg:#F4F6F9;--card:#fff;--line:#DDE3EA;--muted:#5B6773;--red:#C62828;--green:#2E7D32;--amber:#B26A00}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:#1E2A35;font-size:15px}
+header{background:var(--navy);color:#fff;padding:14px 16px}header h1{margin:0;font-size:18px}header p{margin:4px 0 0;font-size:12px;opacity:.85}
+nav{display:flex;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:2}
+nav button{flex:1;padding:12px 6px;border:0;background:none;font-size:14px;font-weight:bold;color:var(--muted);border-bottom:3px solid transparent}
+nav button.on{color:var(--navy);border-bottom-color:var(--navy)}
+main{max-width:640px;margin:0 auto;padding:14px 16px 40px}.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px}
+label{display:block;font-size:13px;font-weight:bold;margin:10px 0 4px}input,select,textarea{width:100%;padding:10px;border:1px solid #C5CED8;border-radius:8px;font-size:15px;background:#fff}
+textarea{min-height:80px}.btn{display:inline-block;padding:11px 16px;border:0;border-radius:8px;background:var(--navy);color:#fff;font-weight:bold;font-size:15px;width:100%;margin-top:14px}
+.btn.sm{width:auto;padding:8px 12px;font-size:13px;margin:6px 6px 0 0}.btn.g{background:var(--green)}.btn.a{background:var(--amber)}.btn.w{background:#fff;color:var(--navy);border:1px solid var(--navy)}
+.msg{padding:10px 12px;border-radius:8px;margin-top:12px;font-size:14px}.ok{background:#E8F5E9;color:var(--green)}.err{background:#FDE2E1;color:var(--red)}
+.pill{display:inline-block;padding:2px 8px;border-radius:12px;font-size:12px;font-weight:bold;background:#EAF1F8;color:var(--navy);margin-right:4px}
+.pill.Overdue,.pill.Breached{background:#FDE2E1;color:var(--red)}.pill.Met,.pill.Closed{background:#E8F5E9;color:var(--green)}.pill.Open{background:#FFF4E5;color:var(--amber)}
+.row{display:flex;gap:10px}.row>div{flex:1}.small{font-size:12px;color:var(--muted)}h3{margin:0 0 6px;font-size:15px}.hide{display:none}
+</style></head><body>
+<header><h1>EMO Infra Complaints</h1><p>Charger and station issues — Bangalore and Delhi. Infra team attends within 2 hours.</p></header>
+<nav><button id="t1" class="on" onclick="tab(1)">Raise complaint</button><button id="t2" onclick="tab(2)">Check status</button><button id="t3" onclick="tab(3)">Infra team</button></nav>
+<main>
+<section id="p1"><div class="card">
+<label>Your name (HSM) *</label><select id="hsm" onchange="pickHsm()"><option value="">Select your name</option></select><input id="name" class="hide" placeholder="Type your name" style="margin-top:6px">
+<label>Phone *</label><input id="phone" inputmode="tel" maxlength="13">
+<div class="row"><div><label>City *</label><select id="city" onchange="fillStations()"><option value="">Select</option><option>Bangalore</option><option>Delhi</option></select></div>
+<div><label>Priority</label><select id="priority"><option>High</option><option>Medium</option><option>Low</option></select></div></div>
+<label>Station *</label><select id="station" onchange="pickStation()"><option value="">Select station</option></select>
+<label>What is the problem? *</label><select id="category"></select>
+<label>Charger / gun ID (if charger issue)</label><input id="asset" placeholder="e.g. CH003 B - NJ - 004">
+<label>Short title *</label><input id="issue" maxlength="200" placeholder="e.g. 2 guns not charging">
+<label>Details</label><textarea id="details" placeholder="What happened, since when, how many vehicles affected"></textarea>
+<label>Photo of the problem * (up to 3)</label><input id="photo" type="file" accept="image/*" multiple>
+<button class="btn" id="sendBtn" onclick="send()">Submit complaint</button><div id="m1"></div></div></section>
+<section id="p2" class="hide"><div class="card"><label>Complaint ID or your phone number</label><input id="q" placeholder="CMP-1029-1612-37 or 98xxxxxxxx">
+<button class="btn" onclick="track()">Check</button><div id="m2"></div></div><div id="r2"></div></section>
+<section id="p3" class="hide"><div class="card"><div class="row"><div><label>Team PIN</label><input id="pin" type="password" inputmode="numeric"></div>
+<div><label>City</label><select id="tcity"><option value="">All</option><option>Bangalore</option><option>Delhi</option></select></div></div>
+<label>Your name</label><select id="member"></select><button class="btn" onclick="load()">Show open complaints</button><button class="btn w" onclick="mvOpen()">Charger movement</button><div id="m3"></div></div>
+<div id="mv" class="card hide"><h3>Charger movement</h3><p class="small">Use whenever chargers move: station to station, to Lab, to OEM, to stock, B2B or faulty. The dashboard updates at once.</p>
+<div class="row"><div><label>Make *</label><select id="mvmake" onchange="mvFill()"><option>Dynolt</option><option>Neenjas</option><option>Solterra</option><option>Kazam</option></select></div><div><label>Quantity *</label><input id="mvqty" type="number" min="1" value="1"></div></div>
+<label>From *</label><select id="mvfrom"></select><label>To *</label><select id="mvto"></select>
+<label>Charger / panel IDs (optional)</label><input id="mvids" placeholder="e.g. SWFTA0012, SWFTA0033">
+<label>Reason *</label><input id="mvreason" placeholder="e.g. Rectifier fault, sent to lab">
+<label>Photo (optional)</label><input id="mvphoto" type="file" accept="image/*" multiple>
+<button class="btn g" id="mvBtn" onclick="mvSend()">Save movement</button><div id="m4"></div></div>
+<div id="r3"></div></section>
+</main>
+<script>var API="https://script.google.com/macros/s/AKfycbwXru69pkBml_YfE6ET0tX_MMlA4QTMRslzsQ2T6kuUpn3Os_kPZBSQdNziDsFmGCHBzA/exec";
+var google={script:{}};Object.defineProperty(google.script,"run",{get:function(){return R(null,null)}});
+function R(s,f){var o={withSuccessHandler:function(h){return R(h,f)},withFailureHandler:function(h){return R(s,h)}};return new Proxy(o,{get:function(t,k){if(k in t)return t[k];return function(){var a=[].slice.call(arguments);fetch(API,{method:"POST",body:JSON.stringify({fn:k,args:a})}).then(function(r){return r.json()}).then(function(j){if(j.ok){if(s)s(j.data)}else if(f)f(new Error(j.error))}).catch(function(){if(f)f(new Error("Network problem - please check internet and try again"))})}}})}
+</script>
+<script>
+var D={stations:[],categories:[],team:[]};
+function el(i){return document.getElementById(i)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function tab(n){[1,2,3].forEach(function(i){el('p'+i).className=i===n?'':'hide';el('t'+i).className=i===n?'on':''})}
+function msg(id,t,ok){el(id).innerHTML=t?'<div class="msg '+(ok?'ok':'err')+'">'+esc(t)+'</div>':''}
+function fillStations(){var c=el('city').value,h=el('hsm').value,s=el('station'),keep=s.value,html='<option value="">Select station</option>';var mine=D.stations.filter(function(x){return h&&(x.hsm===h||(x.cover||'').split(',').indexOf(h)>=0)});if(mine.length){html+='<optgroup label="Your stations">'+mine.map(function(x){return'<option value="'+esc(x.station)+'">'+esc(x.station)+'</option>'}).join('')+'</optgroup>'}['Bangalore','Delhi'].forEach(function(cc){if(c&&c!==cc)return;var l=D.stations.filter(function(x){return x.city===cc&&!(h&&(x.hsm===h||(x.cover||'').split(',').indexOf(h)>=0))});if(l.length)html+='<optgroup label="'+cc+'">'+l.map(function(x){return'<option value="'+esc(x.station)+'">'+esc(x.station)+'</option>'}).join('')+'</optgroup>'});html+='<option value="Other / not in list">Other / not in list</option>';s.innerHTML=html;if(keep)s.value=keep}
+function pickStation(){var v=el('station').value,x=D.stations.find(function(y){return y.station===v});if(x&&el('city').value!==x.city){el('city').value=x.city}}
+function pickHsm(){var h=el('hsm').value;el('name').className=h==='__other'?'':'hide';if(h&&h!=='__other'){var m=D.hsms.find(function(x){return x.name===h});if(m&&m.city)el('city').value=m.city;try{localStorage.setItem('infraHsm',h)}catch(e){}}fillStations()}
+google.script.run.withSuccessHandler(function(d){D=d;el('category').innerHTML='<option value="">Select</option>'+d.categories.map(function(c){return'<option>'+esc(c)+'</option>'}).join('');el('member').innerHTML='<option value="">All members</option>'+d.team.map(function(c){return'<option>'+esc(c)+'</option>'}).join('');el('hsm').innerHTML='<option value="">Select your name</option>'+(d.hsms||[]).map(function(x){return'<option value="'+esc(x.name)+'">'+esc(x.name)+(x.city?' ('+esc(x.city)+')':'')+'</option>'}).join('')+'<option value="__other">Other (type name)</option>';try{var hh=localStorage.getItem('infraHsm');if(hh){el('hsm').value=hh;pickHsm()}}catch(e){}fillStations();try{var p=localStorage.getItem('infraPhone');if(p)el('phone').value=p}catch(e){}}).withFailureHandler(function(e){msg('m1',e.message,false)}).infraPortalData();
+function readImgs(inp,cb){var fs=[].slice.call((inp&&inp.files)||[],0,3),out=[],n=fs.length;if(!n)return cb([]);fs.forEach(function(f,i){var rd=new FileReader();rd.onload=function(){var im=new Image();im.onload=function(){var s=Math.min(1,1280/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);out[i]=c.toDataURL('image/jpeg',0.7);if(--n===0)cb(out)};im.onerror=function(){out[i]=String(rd.result);if(--n===0)cb(out)};im.src=rd.result};rd.readAsDataURL(f)})}
+function plinks(l,u){var a=String(u||'').split(/\s+/).filter(function(x){return/^https:/.test(x)});return a.length?'<br>'+l+': '+a.map(function(x,i){return'<a href="'+esc(x)+'" target="_blank">Photo '+(i+1)+'</a>'}).join(' · '):''}
+function send(){var hv=el('hsm').value,f={name:hv&&hv!=='__other'?hv:el('name').value,phone:el('phone').value,city:el('city').value,station:el('station').value,category:el('category').value,asset:el('asset').value,issue:el('issue').value,details:el('details').value,priority:el('priority').value};
+if(!(el('photo').files&&el('photo').files.length)){msg('m1','Please add at least one photo of the problem',false);return}
+el('sendBtn').disabled=true;msg('m1','Uploading photo and sending...',true);
+readImgs(el('photo'),function(ph){f.photos=ph;google.script.run.withSuccessHandler(function(r){el('sendBtn').disabled=false;try{localStorage.setItem('infraName',f.name);localStorage.setItem('infraPhone',f.phone)}catch(e){}
+msg('m1','Complaint '+r.id+' registered and assigned to '+r.assigned+'. Infra team will attend within '+r.sla+' hours. Save this ID to check status.',true);['asset','issue','details','photo'].forEach(function(i){el(i).value=''})})
+.withFailureHandler(function(e){el('sendBtn').disabled=false;msg('m1',e.message,false)}).infraSubmit(f)})}
+function card(r,team){var h='<div class="card"><h3>'+esc(r.id)+' — '+esc(r.issue)+'</h3><div><span class="pill '+esc(r.status)+'">'+esc(r.status)+'</span><span class="pill '+esc(r.sla)+'">'+esc(r.sla)+'</span><span class="pill">'+esc(r.priority)+'</span></div>'+
+'<p class="small">'+esc(r.station)+' ('+esc(r.city)+') · '+esc(r.category)+(r.asset?' · '+esc(r.asset):'')+'<br>Raised '+esc(r.raised)+' by '+esc(r.by)+' '+esc(r.phone)+'<br>Assigned to <b>'+esc(r.assigned)+'</b>'+(r.attended?' · Attended '+esc(r.attended):'')+(r.closed?' · Closed '+esc(r.closed):'')+plinks('Problem photos',r.photos)+plinks('Photos after fix',r.fixPhotos)+'</p>'+(r.details?'<p class="small">'+esc(r.details)+'</p>':'')+(r.note?'<p class="small"><b>Updates:</b> '+esc(r.note)+'</p>':'');
+if(team){h+='<textarea id="n_'+esc(r.id)+'" placeholder="Note (required to close)"></textarea><label class="small">Photo after fix (required to close)</label><input type="file" accept="image/*" multiple id="ph_'+esc(r.id)+'"><button class="btn sm a" onclick="upd(\''+esc(r.id)+'\',\'attend\')">Attended</button><button class="btn sm w" onclick="upd(\''+esc(r.id)+'\',\'progress\')">In progress</button><button class="btn sm g" onclick="upd(\''+esc(r.id)+'\',\'close\')">Close</button>'}
+return h+'</div>'}
+function track(){msg('m2','Checking...',true);google.script.run.withSuccessHandler(function(l){msg('m2',l.length?'':'No complaint found',false);el('r2').innerHTML=l.map(function(r){return card(r,false)}).join('')}).withFailureHandler(function(e){msg('m2',e.message,false)}).infraTrack(el('q').value)}
+function load(){msg('m3','Loading...',true);google.script.run.withSuccessHandler(function(l){msg('m3',l.length+' open complaint(s)',true);el('r3').innerHTML=l.map(function(r){return card(r,true)}).join('')}).withFailureHandler(function(e){msg('m3',e.message,false);el('r3').innerHTML=''}).infraTeamList(el('pin').value,el('member').value,el('tcity').value)}
+var MV=[],mvFill=function(){};
+function mvOpen(){var p=el('pin').value;if(!p){msg('m3','Enter the team PIN first',false);return}msg('m3','Loading locations...',true);google.script.run.withSuccessHandler(function(l){MV=l;msg('m3','',true);var o=function(){var mk=el('mvmake').value;return'<option value="">Select</option>'+['Bangalore','Delhi','Other'].map(function(c){var x=MV.filter(function(r){return r.city===c});return x.length?'<optgroup label="'+c+'">'+x.map(function(r){return'<option value="'+esc(r.name)+'">'+esc(r.name)+' ('+(r[mk]||0)+' '+mk+')</option>'}).join('')+'</optgroup>':''}).join('')};mvFill=function(){var f=el('mvfrom').value,t=el('mvto').value;el('mvfrom').innerHTML=o();el('mvto').innerHTML=o();el('mvfrom').value=f;el('mvto').value=t};mvFill();el('mv').className='card'}).withFailureHandler(function(e){msg('m3',e.message,false)}).infraMoveData(p)}
+function mvSend(){var m={make:el('mvmake').value,qty:el('mvqty').value,from:el('mvfrom').value,to:el('mvto').value,ids:el('mvids').value,reason:el('mvreason').value,member:el('member').value};if(!m.member){msg('m4','Choose your name above (Your name)',false);return}el('mvBtn').disabled=true;msg('m4','Saving...',true);readImgs(el('mvphoto'),function(ph){m.photos=ph;google.script.run.withSuccessHandler(function(r){el('mvBtn').disabled=false;msg('m4',r,true);['mvids','mvreason','mvphoto'].forEach(function(i){el(i).value=''});mvOpen()}).withFailureHandler(function(e){el('mvBtn').disabled=false;msg('m4',e.message,false)}).infraMove(el('pin').value,m)})}
+function upd(id,a){var n=el('n_'+id).value;var go=function(ph){google.script.run.withSuccessHandler(function(){load()}).withFailureHandler(function(e){msg('m3','',true);alert(e.message)}).infraUpdate(el('pin').value,id,a,n,el('member').value,ph)};if(a==='close'){var inp=el('ph_'+id);if(!n.trim()){alert('Please write what was done before closing');return}if(!(inp&&inp.files&&inp.files.length)){alert('Please add a photo of the fixed work before closing');return}msg('m3','Uploading photo and closing...',true);readImgs(inp,go)}else go([])}
+</script></body></html>
